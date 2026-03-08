@@ -1,0 +1,19 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #FF5900;
+  --color-dark: #000000;
+  --color-primary-dim: rgba(255, 89, 0, 0.15);
+  --color-border: rgba(255, 89, 0, 0.2);
+  --color-text-muted: #888880;
+  --font-display: "Space Grotesk", "Cairo", system-ui, sans-serif;
+  --font-body: "Cairo", system-ui, sans-serif;
+}
+
+* {
+  font-family: var(--font-body);
+}
+
+.font-display {
+  font-family: var(--font-display);
+}
