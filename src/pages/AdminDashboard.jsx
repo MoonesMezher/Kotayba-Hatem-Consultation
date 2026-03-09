@@ -3,6 +3,7 @@ import { collection, getDocs, query, orderBy, doc, deleteDoc } from 'firebase/fi
 import { useFirebase } from '../context/FirebaseContext.jsx'
 import { useLocale } from '../context/LocaleContext.jsx'
 import { copy } from '../data/content.js'
+import LoadingCube from '../components/LoadingCube.jsx'
 
 function serializeDoc(docSnap) {
   const d = docSnap.data()
@@ -124,7 +125,9 @@ export default function AdminDashboard() {
       </div>
       {error && <p className="mb-4 text-red-400">{error}</p>}
       {loading ? (
-        <p className="text-[var(--color-text-muted)]">Loading...</p>
+        <div className="flex justify-center py-12">
+          <LoadingCube size="lg" />
+        </div>
       ) : (
         <div className="overflow-x-auto rounded-xl border border-[var(--color-border)]">
           <table className="w-full text-left text-sm">
@@ -194,7 +197,33 @@ export default function AdminDashboard() {
               <DetailField label={t('form.email')} value={detailRow.email} />
               <DetailField label={t('form.phone')} value={detailRow.phone} />
               <DetailField label={t('form.niche')} value={getOptionLabel(locale, 'form.nicheOptions', detailRow.niche)} />
+              {detailRow.niche_other && (
+                <DetailField label={t('form.nicheOtherPlaceholder')} value={detailRow.niche_other} />
+              )}
               <DetailField label={t('form.platforms')} value={formatPlatforms(locale, detailRow.platforms)} />
+              {detailRow.platform_links && typeof detailRow.platform_links === 'object' && Object.keys(detailRow.platform_links).length > 0 && (
+                <div>
+                  <p className="text-xs font-medium text-[var(--color-text-muted)]">{t('form.platformLinkPlaceholder')}</p>
+                  <div className="mt-1 space-y-1.5">
+                    {Object.entries(detailRow.platform_links)
+                      .filter(([, url]) => url && String(url).trim())
+                      .map(([platform, url]) => (
+                        <p key={platform} className="text-sm">
+                          <span className="text-[var(--color-text-muted)]">{getOptionLabel(locale, 'form.platformOptions', platform)}: </span>
+                          <a
+                            href={url.startsWith('http') ? url : `https://${url}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-[var(--color-primary)] hover:underline break-all"
+                            title={url}
+                          >
+                            {url.length > 30 ? `${url.slice(0, 30)}…` : url}
+                          </a>
+                        </p>
+                      ))}
+                  </div>
+                </div>
+              )}
               <DetailField label={t('form.followers')} value={getOptionLabel(locale, 'form.followerOptions', detailRow.followers)} />
               <DetailField label={t('form.goal')} value={getOptionLabel(locale, 'form.goalOptions', detailRow.goal)} />
               <DetailField label={t('form.problem')} value={detailRow.problem} multiline />

@@ -7,7 +7,7 @@ export default function Header() {
   const homePath = locale === 'en' ? '/en' : '/ar'
 
   return (
-    <header className="relative z-10 flex items-center justify-between px-4 py-4 md:px-8">
+    <header dir="ltr" className="relative z-10 flex items-center justify-between px-4 py-4 md:px-8">
       <Link to={homePath} className="flex items-center gap-2">
         <img
           src={logoUrl}

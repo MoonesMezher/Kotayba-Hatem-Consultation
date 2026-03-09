@@ -3,6 +3,7 @@ import { Link, Navigate, useLocation, Outlet } from 'react-router-dom'
 import { onAuthStateChanged, signOut } from 'firebase/auth'
 import { useFirebase } from '../context/FirebaseContext.jsx'
 import { useLocale } from '../context/LocaleContext.jsx'
+import LoadingCube from './LoadingCube.jsx'
 
 const ADMIN_EMAIL = 'kotaybaehatem@gmail.com'
 
@@ -18,7 +19,8 @@ export default function AdminLayout() {
 
   const isDashboard = location.pathname === '/admin/dashboard'
   const isAnalytics = location.pathname === '/admin/analytics'
-  const pageTitle = isDashboard ? t('admin.consultations') : isAnalytics ? t('admin.analytics') : null
+  const isPrices = location.pathname === '/admin/prices'
+  const pageTitle = isDashboard ? t('admin.consultations') : isAnalytics ? t('admin.analytics') : isPrices ? t('admin.prices') : null
 
   useEffect(() => {
     if (!auth) {
@@ -35,7 +37,7 @@ export default function AdminLayout() {
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-[var(--color-dark)] text-white">
-        <span>Loading...</span>
+        <LoadingCube size="lg" />
       </div>
     )
   }
@@ -68,7 +70,7 @@ export default function AdminLayout() {
               {!isAdminEmail && userEmail && ' (not admin)'}
             </span>
           </div>
-          <nav className="flex shrink-0 items-center gap-4">
+          <nav className="flex flex-wrap items-center gap-4">
             <Link
               to="/admin/dashboard"
               className={`text-sm font-medium ${isDashboard ? 'text-[var(--color-primary)]' : 'text-[var(--color-text-muted)] hover:text-[var(--color-primary)]'}`}
@@ -80,6 +82,12 @@ export default function AdminLayout() {
               className={`text-sm font-medium ${isAnalytics ? 'text-[var(--color-primary)]' : 'text-[var(--color-text-muted)] hover:text-[var(--color-primary)]'}`}
             >
               {t('admin.analytics')}
+            </Link>
+            <Link
+              to="/admin/prices"
+              className={`text-sm font-medium ${isPrices ? 'text-[var(--color-primary)]' : 'text-[var(--color-text-muted)] hover:text-[var(--color-primary)]'}`}
+            >
+              {t('admin.prices')}
             </Link>
             <button
               type="button"

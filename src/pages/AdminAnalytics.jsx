@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { collection, getDocs, query, orderBy } from 'firebase/firestore'
 import { useFirebase } from '../context/FirebaseContext.jsx'
 import { useLocale } from '../context/LocaleContext.jsx'
+import LoadingCube from '../components/LoadingCube.jsx'
 
 function serializeDoc(doc) {
   const d = doc.data()
@@ -69,7 +70,9 @@ export default function AdminAnalytics() {
     <>
       {error && <p className="mb-4 text-red-400">{error}</p>}
       {loading ? (
-        <p className="text-[var(--color-text-muted)]">Loading...</p>
+        <div className="flex justify-center py-12">
+          <LoadingCube size="lg" />
+        </div>
       ) : (
         <div className="space-y-8">
           <div className="rounded-xl border border-[var(--color-border)] bg-[#1a1a1a] p-6">

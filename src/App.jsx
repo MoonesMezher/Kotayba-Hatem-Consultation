@@ -6,6 +6,7 @@ import ConsultationPage from './pages/ConsultationPage.jsx'
 import AdminLogin from './pages/AdminLogin.jsx'
 import AdminDashboard from './pages/AdminDashboard.jsx'
 import AdminAnalytics from './pages/AdminAnalytics.jsx'
+import AdminPrices from './pages/AdminPrices.jsx'
 import NotFoundPage from './pages/NotFoundPage.jsx'
 import AdminLayout from './components/AdminLayout.jsx'
 
@@ -32,6 +33,7 @@ const router = createBrowserRouter([
           { index: true, element: <AdminLogin /> },
           { path: 'dashboard', element: <AdminLayout />, children: [{ index: true, element: <AdminDashboard /> }] },
           { path: 'analytics', element: <AdminLayout />, children: [{ index: true, element: <AdminAnalytics /> }] },
+          { path: 'prices', element: <AdminLayout />, children: [{ index: true, element: <AdminPrices /> }] },
         ],
       },
       { path: '*', element: <NotFoundPage /> },

@@ -31,6 +31,11 @@ export default function HomePage() {
             <p className="mx-auto mt-3 max-w-md text-sm text-[var(--color-text-muted)] leading-relaxed">
               {t('main.heroSub')}
             </p>
+            <p className="mx-auto mt-5 max-w-md text-center text-sm">
+              <span className="font-medium text-[var(--color-primary)]">{t('main.proofRole')}</span>
+              <br />
+              <span className="text-[var(--color-text-muted)]">{t('main.proofExperience')}</span>
+            </p>
           </section>
 
           <section className="flex flex-col gap-3">

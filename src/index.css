@@ -17,3 +17,12 @@
 .font-display {
   font-family: var(--font-display);
 }
+
+@keyframes loading-cube {
+  0%, 100% { transform: rotateZ(0deg) scale(1); opacity: 1; }
+  50% { transform: rotateZ(180deg) scale(1.05); opacity: 0.9; }
+}
+
+.animate-loading-cube {
+  animation: loading-cube 1.2s ease-in-out infinite;
+}

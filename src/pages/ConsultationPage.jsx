@@ -1,10 +1,12 @@
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { useLocale } from '../context/LocaleContext.jsx'
 import { useFirebase } from '../context/FirebaseContext.jsx'
 import Header from '../components/Header.jsx'
 import Footer from '../components/Footer.jsx'
 import ConsultationForm from '../components/ConsultationForm.jsx'
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore'
+import LoadingCube from '../components/LoadingCube.jsx'
+import { collection, addDoc, getDocs, serverTimestamp } from 'firebase/firestore'
 
 const ADMIN_EMAIL = 'kotaybaehatem@gmail.com';
 
@@ -19,8 +21,9 @@ function sendEmail(payload) {
     `Name: ${payload.full_name ?? '—'}`,
     `Email: ${payload.email ?? '—'}`,
     `Phone: ${payload.phone ?? '—'}`,
-    `Niche: ${payload.niche ?? '—'}`,
+    `Niche: ${payload.niche ?? '—'}${payload.niche_other ? ` (${payload.niche_other})` : ''}`,
     `Platforms: ${Array.isArray(payload.platforms) ? payload.platforms.join(', ') : '—'}`,
+    payload.platform_links && Object.keys(payload.platform_links).length ? `Platform links: ${JSON.stringify(payload.platform_links)}` : null,
     `Followers: ${payload.followers ?? '—'}`,
     `Goal: ${payload.goal ?? '—'}`,
     '',
@@ -58,14 +61,34 @@ export default function ConsultationPage() {
   const { locale, t, dir } = useLocale()
   const { db, isConfigured } = useFirebase()
   const homePath = locale === 'en' ? '/en' : '/ar'
+  const [consultationPrice, setConsultationPrice] = useState(null)
+  const [priceLoading, setPriceLoading] = useState(false)
+
+  useEffect(() => {
+    if (!db || !isConfigured) {
+      setPriceLoading(false)
+      return
+    }
+    setPriceLoading(true)
+    getDocs(collection(db, 'services'))
+      .then((snap) => {
+        const doc = snap.docs.find((d) => d.id === 'consultation')
+        const price = doc?.data()?.price_usd
+        setConsultationPrice(price != null && typeof price === 'number' ? price : 145)
+      })
+      .catch(() => setConsultationPrice(145))
+      .finally(() => setPriceLoading(false))
+  }, [db, isConfigured])
 
   const handleSubmit = async (values) => {
-    if (!isConfigured || !db) throw new Error('Firebase not configured. Set VITE_FIREBASE_* in .env.')
+    if (!isConfigured || !db) throw new Error('Server Error.')
     const full_name = values.full_name?.trim() ?? ''
     const email = values.email?.trim() || null
     const phone = values.phone?.trim() || null
     const niche = values.niche ?? ''
+    const niche_other = values.niche_other?.trim() || null
     const platforms = Array.isArray(values.platforms) ? values.platforms : []
+    const platform_links = values.platform_links && typeof values.platform_links === 'object' ? values.platform_links : {}
     const followers = values.followers ?? ''
     const problem = values.problem?.trim() ?? ''
     const goal = values.goal ?? ''
@@ -75,7 +98,9 @@ export default function ConsultationPage() {
       email,
       phone,
       niche,
+      niche_other,
       platforms,
+      platform_links,
       followers,
       problem,
       goal,
@@ -84,7 +109,7 @@ export default function ConsultationPage() {
       created_at: serverTimestamp(),
     }
     addDoc(collection(db, 'consultations'), row).then(() => {
-      sendEmail({ full_name, email, phone, niche, platforms, followers, problem, goal, previous_experience, locale })
+      sendEmail({ full_name, email, phone, niche, niche_other, platforms, platform_links, followers, problem, goal, previous_experience, locale })
     })
   }
 
@@ -108,6 +133,28 @@ export default function ConsultationPage() {
             </span>
             <h1 className="font-display mt-3 text-2xl font-bold">{t('main.consultation')}</h1>
           </section>
+
+          {(priceLoading || consultationPrice != null) && (
+            <div className="mb-6 flex justify-center">
+              {priceLoading ? (
+                <div className="flex min-h-[120px] items-center justify-center rounded-2xl border border-[var(--color-border)] bg-gradient-to-br from-[#1a1a1a] to-[#252525] px-12 shadow-lg ring-1 ring-[var(--color-primary)]/20">
+                  <LoadingCube size="lg" />
+                </div>
+              ) : (
+                <div className="relative overflow-hidden rounded-2xl border border-[var(--color-border)] bg-gradient-to-br from-[#1a1a1a] to-[#252525] p-6 text-center shadow-lg ring-1 ring-[var(--color-primary)]/20">
+                  <div className="absolute top-0 right-0 h-24 w-24 translate-x-6 -translate-y-6 rounded-full bg-[var(--color-primary)]/10" aria-hidden />
+                  <p className="text-xs font-medium uppercase tracking-wider text-[var(--color-text-muted)]">
+                    {t('price.from')}
+                  </p>
+                  <p className="mt-1 font-display text-4xl font-black text-[var(--color-primary)]">
+                    ${consultationPrice}
+                  </p>
+                  <p className="mt-0.5 text-sm text-[var(--color-text-muted)]">{t('price.usd')}</p>
+                  <p className="mt-2 text-sm font-medium text-white">{t('price.consultation')}</p>
+                </div>
+              )}
+            </div>
+          )}
 
           <div className="mb-6 rounded-xl border border-[var(--color-border)] border-r-4 border-r-[var(--color-primary)] bg-[var(--color-primary-dim)] p-5">
             <h2 className="text-sm font-bold text-[var(--color-primary)]">⚠️ {t('notice.title')}</h2>
